@@ -1,0 +1,4 @@
+
+22/03/2010
+	Lançamento da versão beta do importador de contatos.
+	v.0.01

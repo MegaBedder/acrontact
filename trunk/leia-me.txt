@@ -1,0 +1,15 @@
+
+                    ACROncact - Importador de Contatos
+                               v.0.01b
+
+
+    O acrontact é um script feito em PHP (melhor uso com a versão 5.2),
+desenvolvido com a finalidade de pegar a lista de contatos (amigos) dos
+usuarios de redes sociais e serviços de e-mail.
+
+
+    Atualmente, em versão beta, suporta apenas o GMail e o Orkut,
+devendo expandir para outros serviços de e-mail e redes sociais.
+
+
+    Para usar o importador de contatos veja o arquivo exemplo.php
