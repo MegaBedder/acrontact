@@ -10,7 +10,7 @@
 
 Adir Kuhn - adirkuhn@gmail.com
 
-v.0.01b
+v.0.02b
  *
  */
 include "ACROntact/acrontact.php";
