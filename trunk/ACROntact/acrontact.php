@@ -1,26 +1,23 @@
 <?php
 /*
  *
-   _____      .___.__           ____  __.     .__
-  /  _  \   __| _/|__|_______  |    |/ _|__ __|  |__   ____
- /  /_\  \ / __ | |  |\_  __ \ |      < |  |  \  |  \ /    \
-/    |    | /_/ | |  | |  | \/ |    |  \|  |  /   Y  \   |  \
-\____|__  |____ | |__| |__|    |____|__ \____/|___|  /___|  /
-        \/     \/                      \/          \/     \/
-
-Adir Kuhn - adirkuhn@gmail.com
-
-v.0.02b
+   _____  _________ __________________          __                   __
+  /  _  \ \_   ___ \\______   \_____  \   _____/  |______     ____ _/  |_
+ /  /_\  \/    \  \/ |       _//   |   \ /    \   __\__  \  _/ ___\\   __\
+/    |    \     \____|    |   |    |    \   |  \  |  / __ \_\  \___ |  |
+\____|__  /\______  /|____|_  |_______  /___|  /__| (____  / \___  >|__|
+        \/        \/        \/        \/     \/          \/      \/
  *
  */
 
-include_once("erros.php");
+require_once("servicos/base.php");
 
 //Lista com os serviços disponiveis neste script.
 $arr_servicos = array(
 		//Serviço de email
 		'Gmail',
 		'Hotmail',
+		'YahooMail',
 
 		//Redes Sociais
 		'Orkut'
@@ -30,98 +27,47 @@ $arr_servicos = array(
 ### Classe geral. ###
 #####################
 class acrontact {
-	####################
-	### Conf. Padrão ###
-	####################
-		private $mostra_erros = true; //'true' para mostrar msg de erro ou 'false' para não
 
-		private $ch;
-		private $cookiearr;
-		private $cookie;
-		private $charset;
+	private $mostra_erros = true; //'true' para mostrar msg de erro ou 'false' para não
 
-
-		public $contatos = array();
-		public $login;
-		public $senha;
+	public $contatos = array();
 
 	########################################################################################################
 	### Função para retornar os contatos, definir o 'nome' do serviço, que a classe se vira com o resto. ###
 	########################################################################################################
 	public function pegaContatos($servico = null) {
-		global $arr_servicos;
+
+		$base = new acrontactBase;
+		$base->mostra_erros = $this->mostra_erros;
 		//Verifica se o serviço esta setado.
 		if (!isset($servico)) {
-			$this->mostra_erro(0);
+			$base->mostra_erro(0);
 		}
 
 		//Chama função
+		$return = 0;
 		switch(strtolower($servico)) {
 			case 'gmail': //Gmail
-				$this->pegaContatosGmail();
+				$return = $this->pegaContatosGmail();
 				break;
 
 			case 'orkut': //Orkut
-				$this->pegaContatosOrkut();
+				$return = $this->pegaContatosOrkut();
 				break;
 
 			case 'hotmail': //Hotmail / Live
-				$this->pegaContatosHotmail();
+				$return = $this->pegaContatosHotmail();
+				break;
+
+			case 'yahoomail': //yahoo
+				$return = $this->pegaContatosYahoomail();
 				break;
 
 			default:
-				$this->mostra_erro(1);
+				$base->mostra_erro(1);
 		}
-	}
-
-	####################################################################
-	### Função para mostrar mensagens de erro, e possiveis soluções. ###
-	####################################################################
-	private function mostra_erro($erro_id) {
-		if ($this->mostra_erros) {
-			global $msg_erros;
-			echo $msg_erros[$erro_id]['ERR'] . "<br/>" . $msg_erros[$erro_id]['SOL'];
-		}
-	}
-
-	####################################################
-	### Grava cookies das paginas chamadas pelo curl ###
-	####################################################
-	private function gravaCookies($ch, $html) {
-		$cookiearr = array();
-
-		//Pega o charset da pagina requisitada, variavel usada no gmail.
-		if (preg_match("/Content-Type: text\\/csv; charset=([^\s;$]+)/", $html, $matches)) {
-			$this->charset = $matches[1];
-		}
-
-		//trata os set-cookie do cabeçalho
-		if(!strncmp($html, "Set-Cookie:", 11)) {
-			$cookiestr = trim(substr($html, 11, -1));
-			$cookie = explode(';', $cookiestr);
-			foreach($cookie as $k => $v) {
-				if(strpos($v, "=") !== false) {
-					$cookie = explode('=', $v, 2);
-					$this->cookiearr[trim($cookie[0])] = trim($cookie[1]);
-				}
-				else {
-					$this->cookiearr[trim($v)] = "";
-				}
-			}
-		}
-
-		//seta cookie no curl
-		$this->cookie = "";
-		if(!empty($this->cookiearr)) {
-			foreach ($this->cookiearr as $key=>$value) {
-				$this->cookie .= "$key=$value; ";
-			}
-			//curl_setopt($this->ch, CURLOPT_COOKIE, $this->cookie);
-			curl_setopt($this->ch ,CURLOPT_HTTPHEADER, array (
-				"Cookie: {$this->cookie}",
-			));
-		}
-		return strlen($html);
+		unset($base);
+		return $return;
 	}
 
 	########################################
@@ -129,6 +75,15 @@ class acrontact {
 	########################################
 	private function pegaContatosGmail() {
 		require_once("servicos/gmail.php");
+
+		$acro = new acrontactGmail;
+		$acro->mostra_erros = $this->mostra_erros;
+		$acro->login = $this->login;
+		$acro->senha = $this->senha;
+		$return = $acro->pegaContatos();
+		$this->contatos = $acro->contatos;
+		unset($acro);
+		return $return;
 	}
 
 	########################################
@@ -136,6 +91,15 @@ class acrontact {
 	########################################
 	private function pegaContatosOrkut() {
 		require_once("servicos/orkut.php");
+
+		$acro = new acrontactOrkut;
+		$acro->mostra_erros = $this->mostra_erros;
+		$acro->login = $this->login;
+		$acro->senha = $this->senha;
+		$return = $acro->pegaContatos();
+		$this->contatos = $acro->contatos;
+		unset($acro);
+		return $return;
 	}
 
 	###################################
@@ -143,6 +107,31 @@ class acrontact {
 	###################################
 	function pegaContatosHotmail() {
 		require_once("servicos/hotmail.php");
+
+		$acro = new acrontactHotmail;
+		$acro->mostra_erros = $this->mostra_erros;
+		$acro->login = $this->login;
+		$acro->senha = $this->senha;
+		$return = $acro->pegaContatos();
+		$this->contatos = $acro->contatos;
+		unset($acro);
+		return $return;
+	}
+
+	###################################
+	### Importa contatos do Hotmail ###
+	###################################
+	function pegaContatosYahoomail() {
+		require_once("servicos/yahoo.php");
+
+		$acro = new acrontactYahoomail;
+		$acro->mostra_erros = $this->mostra_erros;
+		$acro->login = $this->login;
+		$acro->senha = $this->senha;
+		$return = $acro->pegaContatos();
+		$this->contatos = $acro->contatos;
+		unset($acro);
+		return $return;
 	}
 
 }
