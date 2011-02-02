@@ -7,7 +7,7 @@ class acrontactHotmail extends acrontactBase {
 	private function login() {
 		//carrega pagina de login
 		$this->ch = curl_init();
-		curl_setopt($this->ch, CURLOPT_URL, "http://login.live.com/");
+		curl_setopt($this->ch, CURLOPT_URL, "http://login.live.com/login.srf?id=2");
 		curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -25,7 +25,7 @@ class acrontactHotmail extends acrontactBase {
 		//pega action do form de login
 		preg_match('/action="([^"]+)"/', $html, $matches);
 		$pagina_login_action = $matches[1];
-
+		
 		//submete o form
 		curl_setopt($this->ch, CURLOPT_URL, $pagina_login_action);
 		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER,1);
@@ -34,6 +34,8 @@ class acrontactHotmail extends acrontactBase {
 		curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($this->ch, CURLOPT_HEADER, TRUE);
 		$html = curl_exec($this->ch);
+		//echo(strip_tags($html));
+		//die("<hr>");
 
 		//verifica se esta logado
 		if (!isset($this->cookiearr['PPAuth']) && !isset($this->cookiearr['MSPAuth'])) {
@@ -95,7 +97,8 @@ class acrontactHotmail extends acrontactBase {
 						foreach($tmp_arr_email as $vemail) {
 							$email = html_entity_decode(urldecode(str_replace('\x', '%', $vemail)));
 							if(!empty($email)) {
-								if(strpos($email, "@") === false) {
+								$email = preg_replace("/[^[:alnum:]\.@_-]/i", "", $email);
+								if(strpos($email, "@") === false || $email == urldecode($login)) {
 									continue;
 								}
 								$this->contatos[$k]['nome']  = (empty($nome)? current(explode("@", $email)) : $nome);
