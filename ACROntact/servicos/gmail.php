@@ -92,7 +92,6 @@ class acrontactGmail extends acrontactBase {
 		$xml = new SimpleXMLElement($html);
 	
 		$totalResults = (int) $xml->channel->totalResults;
-		echo $xml->channel->item[0]->gd->attributes()->address;
 		for($i=0; $i<$totalResults; $i++) {
 			if($xml->channel->item[$i]->gd->attributes()->address == "") {
 				continue;
