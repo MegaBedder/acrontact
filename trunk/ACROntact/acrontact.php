@@ -20,7 +20,7 @@ $arr_servicos = array(
 		'YahooMail',
 
 		//Redes Sociais
-		'Orkut'
+		//'Orkut' bloqueado pelo google
 	);
 
 #####################
@@ -51,9 +51,9 @@ class acrontact {
 				$return = $this->pegaContatosGmail();
 				break;
 
-			case 'orkut': //Orkut
+			/*case 'orkut': //Orkut
 				$return = $this->pegaContatosOrkut();
-				break;
+				break;*/
 
 			case 'hotmail': //Hotmail / Live
 				$return = $this->pegaContatosHotmail();
